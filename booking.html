@@ -52,6 +52,16 @@ button,input,textarea{font:inherit;color:inherit}button{cursor:pointer;border:0;
 .search input{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px 40px 10px 12px;background:#fff}
 .search input:focus{outline:none;border-color:var(--g)}
 .search svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--mut);fill:none;stroke-width:2}
+.srow{display:flex;gap:8px;align-items:center;margin:8px 0 2px}.srow .search{flex:1;margin:0}
+.vt{flex:none;border:2px solid var(--line);background:#fff;border-radius:14px;padding:9px 12px;font-weight:700;font-size:.85rem;color:var(--g);white-space:nowrap}
+.grid.compact{grid-template-columns:1fr 1fr!important;gap:8px!important}
+.compact .it{border:1.5px solid #9cc9ae;border-radius:12px;padding:8px 8px 6px!important;gap:3px;text-align:center}
+.compact .it h3{font-size:.9rem;line-height:1.45;min-height:2.6em;display:flex;align-items:center;justify-content:center}
+.compact .cd{font-family:var(--lat);font-size:.72rem;color:var(--r);font-weight:600;direction:ltr}
+.compact .meta{justify-content:center;gap:8px}
+.compact .step button{width:32px;height:30px;font-size:1.1rem}
+.compact .step input{width:38px;font-size:.95rem}
+.compact .unit{display:none}
 .ratehint{font-size:.85rem;color:var(--mut);margin:6px 2px 0}
 /* grid */
 .grid{list-style:none;margin:12px 0 0;padding:0 0 120px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -143,7 +153,7 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
   <main class="wrap" id="shopView">
     <div class="shopbox" id="shopBox" hidden><label>کس دکان کا آرڈر ہے؟</label><input id="shopName" list="shopList" placeholder="دکان کا نام لکھیں یا چنیں"><datalist id="shopList"></datalist></div>
     <div class="packs" id="packs" role="tablist"></div>
-    <div class="search"><input id="q" type="search" placeholder="تلاش کریں… مثلاً ہلدی، بادام"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+    <div class="srow"><div class="search"><input id="q" type="search" placeholder="تلاش کریں… مثلاً ہلدی، بادام"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><button class="vt" id="vt" aria-label="ڈسپلے بدلیں"></button></div>
     <ul class="grid" id="grid"></ul>
   </main>
 
@@ -205,7 +215,8 @@ function login(code,manual){
     start();
   }).catch(function(){$('lbtn').disabled=false;$('lbtn').textContent='اندر جائیں';showLogin();showErr('انٹرنیٹ کا مسئلہ، دوبارہ کوشش کریں')});
 }
-function showErr(m){$('lerr').textContent=m;$('lerr').hidden=false}
+function ltrNums(m){return esc(m).replace(/(\d[\d -]{5,}\d)/g,'<bdi dir="ltr" class="lat" style="white-space:nowrap">$1</bdi>')}
+function showErr(m){$('lerr').innerHTML=ltrNums(m);$('lerr').hidden=false}
 function showLogin(){$('login').hidden=false;$('app').hidden=true}
 function start(){
   $('login').hidden=true;$('app').hidden=false;
@@ -225,13 +236,18 @@ $('shopName').addEventListener('input',function(){ls('bp_shop',this.value)});
 function pouch(i){var c=(COL[i.name]||['#b5702f'])[0];return '<div class="pouch" style="--c:'+c+'"><i class="l"></i><span class="tag">'+esc(i.name)+'</span><span class="heap"></span><span class="pk2">'+esc(i.pack)+'</span></div>'}
 function renderGrid(){
   var list=S.items.filter(function(i){return S.q?i.name.indexOf(S.q)>-1:i.pack===S.pack});
+  var cp=S.view==='c';$('grid').classList.toggle('compact',cp);$('vt').textContent=cp?'🖼 تصویر':'☰ چھوٹا';
   if(!list.length){$('grid').innerHTML='<li class="empty" style="grid-column:1/-1">کچھ نہیں ملا</li>';return}
+  var price=function(i){return i.rate===null?'<span class="price call">ریٹ کال پر</span>':'<span class="price">'+fmt(i.rate)+'</span>'};
+  var step=function(q){return '<div class="step"><button class="minus" data-d="-1" aria-label="کم">−</button><input class="qty" inputmode="numeric" value="'+(q||'')+'" placeholder="0" aria-label="تعداد"><button class="plus" data-d="1" aria-label="زیادہ">+</button></div>'};
   $('grid').innerHTML=list.map(function(i){var q=S.cart[i.id]||0;
+    if(cp)return '<li class="it'+(q?' has':'')+'" data-id="'+i.id+'"><h3>'+esc(i.name)+'</h3><div class="cd">'+esc(i.id.toUpperCase())+(S.q?' · '+esc(i.pack):'')+'</div><div class="meta">'+price(i)+'<span>/ '+esc(i.unit)+'</span></div>'+step(q)+'</li>';
     return '<li class="it'+(q?' has':'')+'" data-id="'+i.id+'">'+pouch(i)+'<h3>'+esc(i.name)+'</h3>'+
-    '<div class="meta"><span>'+(S.q?esc(i.pack)+' · ':'')+'فی '+esc(i.unit)+'</span>'+(i.rate===null?'<span class="price call">ریٹ کال پر</span>':'<span class="price">'+fmt(i.rate)+'</span>')+'</div>'+
+    '<div class="meta"><span>'+(S.q?esc(i.pack)+' · ':'')+'فی '+esc(i.unit)+'</span>'+price(i)+'</div>'+
     (i.face?'<div class="meta"><span>پرچون</span><span class="lat">'+fmt(i.face)+'</span></div>':'')+
-    '<div class="step"><button class="minus" data-d="-1" aria-label="کم">−</button><input class="qty" inputmode="numeric" value="'+(q||'')+'" placeholder="0" aria-label="تعداد"><button class="plus" data-d="1" aria-label="زیادہ">+</button></div><div class="unit">'+esc(i.unit)+'</div></li>'}).join('');
+    step(q)+'<div class="unit">'+esc(i.unit)+'</div></li>'}).join('');
 }
+$('vt').addEventListener('click',function(){S.view=S.view==='c'?'p':'c';ls('bp_view',S.view);renderGrid()});
 function setQty(id,q){q=Math.max(0,Math.min(9999,Math.floor(Number(q)||0)));if(q)S.cart[id]=q;else delete S.cart[id];ls('bp_cart_'+S.code,JSON.stringify(S.cart));renderBar()}
 function itemById(id){for(var k=0;k<S.items.length;k++)if(S.items[k].id===id)return S.items[k]}
 function bindSteps(root,rerender){
@@ -247,7 +263,7 @@ function openCart(){
   var ot=S.user.type==='آرڈر ٹیکر',shop=$('shopName').value.trim();
   $('cshop').hidden=!ot;$('cshop').textContent=shop?'دکان: '+shop:'⚠️ اوپر دکان کا نام لکھیں';
   $('crows').innerHTML=ids.map(function(id){var i=itemById(id),q=S.cart[id];if(!i)return'';
-    return '<div class="row" data-id="'+id+'"><div><b>'+esc(i.name)+'</b><small>'+esc(i.pack)+' · '+(i.rate===null?'ریٹ کال پر':fmt(i.rate)+' فی '+esc(i.unit))+'</small></div><div class="amt">'+(i.rate===null?'—':fmt(q*i.rate))+'</div>'+
+    return '<div class="row" data-id="'+id+'"><div><b><span class="lat" style="color:var(--r);font-size:.75rem">['+esc(i.id.toUpperCase())+']</span> '+esc(i.name)+'</b><small>'+esc(i.pack)+' · '+(i.rate===null?'ریٹ کال پر':fmt(i.rate)+' فی '+esc(i.unit))+'</small></div><div class="amt">'+(i.rate===null?'—':fmt(q*i.rate))+'</div>'+
     '<div class="step"><button class="minus" data-d="-1">−</button><input class="qty" inputmode="numeric" value="'+q+'"><button class="plus" data-d="1">+</button></div></div>'}).join('');
   var T=totals();$('ctot').textContent=fmt(T.t);$('cpend').hidden=!T.p;$('cerr').hidden=true;$('cart').hidden=false;
 }
@@ -260,7 +276,7 @@ $('send').addEventListener('click',function(){
   var btn=this;btn.disabled=true;btn.textContent='بھیجا جا رہا ہے…';
   call('order',{cart:cart,shop:shop,note:$('note').value}).then(function(r){
     btn.disabled=false;btn.textContent='✅ آرڈر بھیجیں';
-    if(!r.ok){if(r.err==='blocked'||r.err==='code'){logout();showErr(r.msg);return}$('cerr').textContent=r.msg;$('cerr').hidden=false;return}
+    if(!r.ok){if(r.err==='blocked'||r.err==='code'){logout();showErr(r.msg);return}$('cerr').innerHTML=ltrNums(r.msg);$('cerr').hidden=false;return}
     S.cart={};ls('bp_cart_'+S.code,null);$('note').value='';$('cart').hidden=true;renderGrid();renderBar();
     $('dno').textContent=r.no;$('dtot').textContent='کل رقم: '+fmt(r.total)+(r.pending?' + باقی ریٹ کال پر':'');
     var msg='*بابو پلس آرڈر* '+r.no+'\n'+(S.user.type==='آرڈر ٹیکر'?'بکر: '+S.user.name+'\n':'')+'دکان: '+r.shop+'\n\n'+r.items.join('\n')+'\n\nکل: '+fmt(r.total)+(r.pending?' + باقی':'');
@@ -282,7 +298,7 @@ $('menuBtn').addEventListener('click',function(e){if(e.target.closest('[data-m]'
 $('menu').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b)return;$('menu').hidden=true;var m=b.dataset.m;
   if(m==='out'){if(confirm('باہر نکلنا ہے؟'))logout()}else if(m==='refresh'){login(S.code)}else view(m)});
 function logout(){ls('bp_code',null);S.user=null;$('code').value='';showLogin()}
-var saved=ls('bp_code');if(saved){$('code').value=saved;login(saved)}
+S.view=ls('bp_view')||'c';var saved=ls('bp_code');if(saved){$('code').value=saved;login(saved)}
 })();
 </script>
 </body></html>
