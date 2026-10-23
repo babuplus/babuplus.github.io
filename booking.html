@@ -98,6 +98,22 @@ background:radial-gradient(ellipse 40% 66% at 50% 78%,color-mix(in srgb,var(--c)
 .chips button.on{border-color:#b42318;background:#fff5f5;color:#b42318}
 #cpOrder{width:100%;padding:12px;border:2px solid var(--line);border-radius:14px;font:inherit;background:#fff;margin:4px 0 10px}
 .lbl{font-weight:700;margin-top:6px;display:block}
+/* notice board */
+.nb{padding-top:10px}
+.nbb{width:100%;display:flex;align-items:center;gap:10px;text-align:right;border-radius:16px;padding:10px 12px;background:linear-gradient(135deg,#FFF4D6,#FFE7A8);border:1.5px solid #F5C451;box-shadow:0 6px 16px rgba(245,166,35,.18);position:relative;overflow:hidden}
+.nbb .ic{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:1.25rem;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.nbb .tx{flex:1;min-width:0;line-height:1.6}
+.nbb .tx small{display:block;font-weight:700;font-size:.72rem;color:#8a5a00}
+.nbb .tx span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600;font-size:.9rem;transition:opacity .35s}
+.nbb .more{flex:none;font-size:.72rem;font-weight:700;color:#fff;background:var(--r);border-radius:999px;padding:3px 9px}
+.nbb.k-offer{background:linear-gradient(135deg,#E6F7EC,#C9EED6);border-color:#7CCB98}.nbb.k-offer .tx small{color:var(--g)}
+.nbb.k-rate{background:linear-gradient(135deg,#FFEDE6,#FFD3C2);border-color:#F29B7A}.nbb.k-rate .tx small{color:#B4380F}
+.nbb.k-new{background:linear-gradient(135deg,#E8F1FF,#CFE0FF);border-color:#8DB2F2}.nbb.k-new .tx small{color:#1F4FA8}
+.nc{border-radius:16px;padding:12px 14px;margin-top:10px;border:1.5px solid var(--line);background:#fffdf8}
+.nc .kd{display:inline-block;font-size:.75rem;font-weight:700;border-radius:999px;padding:2px 10px;background:#FFF1CC;color:#8a5a00}
+.nc.k-offer .kd{background:#DDF3E5;color:var(--g)}.nc.k-rate .kd{background:#FFE1D6;color:#B4380F}.nc.k-new .kd{background:#DCE8FF;color:#1F4FA8}
+.nc p{margin:6px 0 0;font-weight:600;line-height:1.9}
+.nc small{display:block;color:var(--mut);margin-top:4px;font-size:.78rem}
 /* sheet */
 .ov{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:#fff;width:100%;max-width:760px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
@@ -152,9 +168,11 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
     <div class="who"><b id="uname"></b><small id="utype"></small></div>
     <button class="ib" id="ordersBtn" aria-label="میرے آرڈر"><svg viewBox="0 0 24 24"><path d="M9 5h10M9 12h10M9 19h10M4 5h.01M4 12h.01M4 19h.01"/></svg></button>
     <div class="ib" id="menuBtn" role="button" tabindex="0" aria-label="مینیو"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-      <div class="menu" id="menu" hidden><button data-m="shop">🛒 نیا آرڈر</button><button data-m="orders">📋 میرے آرڈر</button><button data-m="complain">⚠️ شکایت</button><button data-m="refresh">🔄 تازہ کریں</button><button data-m="out">🚪 باہر نکلیں</button></div>
+      <div class="menu" id="menu" hidden><button data-m="shop">🛒 نیا آرڈر</button><button data-m="orders">📋 میرے آرڈر</button><button data-m="notices">📢 اعلانات</button><button data-m="complain">⚠️ شکایت</button><button data-m="refresh">🔄 تازہ کریں</button><button data-m="out">🚪 باہر نکلیں</button></div>
     </div>
   </div></header>
+
+  <div class="wrap nb" id="nb" hidden><button class="nbb" id="nbBtn"><span class="ic" id="nbIc"></span><span class="tx"><small id="nbK"></small><span id="nbT"></span></span><em class="more" id="nbN"></em></button></div>
 
   <main class="wrap" id="shopView">
     <div class="shopbox" id="shopBox" hidden><label>کس دکان کا آرڈر ہے؟</label><input id="shopName" list="shopList" placeholder="دکان کا نام لکھیں یا چنیں"><datalist id="shopList"></datalist></div>
@@ -192,6 +210,12 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
   <button class="ghost" data-close>نیا آرڈر</button>
 </div></div>
 
+<div class="ov" id="nbs" hidden><div class="sheet">
+  <h2>📢 اعلانات <button class="x" data-close>✕</button></h2>
+  <div id="nlist"></div>
+  <button class="ghost" data-close style="margin-top:14px">ٹھیک ہے</button>
+</div></div>
+
 <div class="ov" id="cp" hidden><div class="sheet">
   <h2>⚠️ شکایت <button class="x" data-close>✕</button></h2>
   <label class="lbl">کون سا آرڈر؟</label>
@@ -206,7 +230,7 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
 <div class="toast" id="toast" hidden></div>
 <script>
 (function(){
-var API='https://script.google.com/macros/s/AKfycbzdq9bogxlYq3nJCjsQKRcDjhaOYjvLWIZwn1UnTP0Z2GnE0GUz8bgES3MJCYAvKSsL/exec',WA='923146797625',COL={"گرم مصالحہ": ["#7a3b1e", "m"], "گرم مصالحہ پاؤڈر": ["#8a4a22", "m"], "سرخ مرچ پاؤڈر": ["#c0261b", "m"], "سرخ مرچ دھڑا": ["#b3241a", "m"], "سرخ مرچ ثابت": ["#a51d16", "m"], "ہلدی پاؤڈر": ["#e9a515", "m"], "دھنیا پاؤڈر": ["#a68a4a", "m"], "دھنیا ثابت": ["#b59a5a", "m"], "زیرہ سفید": ["#8f7448", "m"], "کالی مرچ": ["#2e2420", "m"], "کالی مرچ پاؤڈر": ["#3d302a", "m"], "سبز الائچی": ["#7c9a3c", "m"], "موٹی الائچی": ["#4a3226", "m"], "لونگ": ["#5a3220", "m"], "دار چینی": ["#8b4a26", "m"], "اجوائن": ["#9c8a5c", "m"], "کلونجی": ["#1f1b1a", "m"], "قصوری میتھی": ["#5f7d34", "m"], "کڑی مصالحہ مکس": ["#b5531f", "m"], "ہانڈی مصالحہ": ["#a8401c", "m"], "ادرک پاؤڈر": ["#d2b27a", "m"], "لہسن پاؤڈر": ["#e8dcc0", "m"], "لہسن ثابت": ["#efe6d2", "m"], "انار دانہ": ["#7a1f2b", "m"], "املی": ["#5b2e1a", "m"], "سونف": ["#93a35a", "m"], "میٹھی سونف": ["#d9a5b8", "m"], "خشخاش": ["#ece6d6", "m"], "پودینہ": ["#3f7a3a", "m"], "کڑی پتا": ["#2f6b2a", "m"], "ٹاٹری": ["#f1efe8", "m"], "میٹھا سوڈا": ["#f7f7f2", "m"], "زردہ رنگ سادہ": ["#f39c12", "m"], "زردہ رنگ مکس": ["#e8532a", "m"], "پان مصالحہ": ["#9b3f5c", "m"], "بادام": ["#c98a4b", "d"], "بادام گری": ["#d9a066", "d"], "کاجو": ["#ecd3a0", "d"], "پستہ": ["#9bb35a", "d"], "اخروٹ": ["#8a5a32", "d"], "انجیر": ["#9a6a4a", "d"], "منقہ": ["#4e1f22", "d"], "کشمش میوہ": ["#b3772a", "d"], "کشمیری میوہ": ["#a35a2a", "d"], "مکس ڈرائی فروٹ": ["#b0703a", "d"], "گری میوہ مکس": ["#c89a5a", "d"], "گری کھوپرا": ["#f3ead8", "d"], "گری برادہ": ["#f6efe0", "d"], "چار مغز": ["#d6b98a", "d"], "مضافتی کھجور": ["#3f1c14", "d"], "ایرانی کھجور": ["#5a2616", "d"], "خرمانی جیلی": ["#e98a2a", "d"], "مکس نمکو دال": ["#e0a43a", "n"], "پی نٹ سالٹ": ["#d8a86a", "n"], "چنے بھنے": ["#c88a3a", "n"], "ریوڑی": ["#f2e2c0", "n"], "پی نٹ ریوڑی": ["#d9b07a", "n"], "چکوال ریوڑی": ["#eedab0", "n"], "مصری": ["#f4f1ea", "n"], "تخم ملنگا": ["#2a2a2a", "n"], "کتیرا گوند": ["#efe7cf", "n"], "چھلکا اسپغول": ["#e6dcc6", "n"], "ساگو دانہ": ["#f5f2ea", "n"], "سبز چائے": ["#5a7a2a", "n"], "پشاوری قہوہ": ["#6a8a3a", "n"], "لیمن گراس": ["#9ab84a", "n"], "مایہ کلف": ["#f2f0ea", "n"], "کالی مرچ ثابت": ["#2e2420", "m"]};
+var API='https://script.google.com/macros/s/AKfycbx8BnfcY2gTzk2efWJhDpLwDlb7BJEW9fwkLs-Rgp2G1FoE-EjHnBRLjcu-5oyIwkQ/exec',WA='923146797625',COL={"گرم مصالحہ": ["#7a3b1e", "m"], "گرم مصالحہ پاؤڈر": ["#8a4a22", "m"], "سرخ مرچ پاؤڈر": ["#c0261b", "m"], "سرخ مرچ دھڑا": ["#b3241a", "m"], "سرخ مرچ ثابت": ["#a51d16", "m"], "ہلدی پاؤڈر": ["#e9a515", "m"], "دھنیا پاؤڈر": ["#a68a4a", "m"], "دھنیا ثابت": ["#b59a5a", "m"], "زیرہ سفید": ["#8f7448", "m"], "کالی مرچ": ["#2e2420", "m"], "کالی مرچ پاؤڈر": ["#3d302a", "m"], "سبز الائچی": ["#7c9a3c", "m"], "موٹی الائچی": ["#4a3226", "m"], "لونگ": ["#5a3220", "m"], "دار چینی": ["#8b4a26", "m"], "اجوائن": ["#9c8a5c", "m"], "کلونجی": ["#1f1b1a", "m"], "قصوری میتھی": ["#5f7d34", "m"], "کڑی مصالحہ مکس": ["#b5531f", "m"], "ہانڈی مصالحہ": ["#a8401c", "m"], "ادرک پاؤڈر": ["#d2b27a", "m"], "لہسن پاؤڈر": ["#e8dcc0", "m"], "لہسن ثابت": ["#efe6d2", "m"], "انار دانہ": ["#7a1f2b", "m"], "املی": ["#5b2e1a", "m"], "سونف": ["#93a35a", "m"], "میٹھی سونف": ["#d9a5b8", "m"], "خشخاش": ["#ece6d6", "m"], "پودینہ": ["#3f7a3a", "m"], "کڑی پتا": ["#2f6b2a", "m"], "ٹاٹری": ["#f1efe8", "m"], "میٹھا سوڈا": ["#f7f7f2", "m"], "زردہ رنگ سادہ": ["#f39c12", "m"], "زردہ رنگ مکس": ["#e8532a", "m"], "پان مصالحہ": ["#9b3f5c", "m"], "بادام": ["#c98a4b", "d"], "بادام گری": ["#d9a066", "d"], "کاجو": ["#ecd3a0", "d"], "پستہ": ["#9bb35a", "d"], "اخروٹ": ["#8a5a32", "d"], "انجیر": ["#9a6a4a", "d"], "منقہ": ["#4e1f22", "d"], "کشمش میوہ": ["#b3772a", "d"], "کشمیری میوہ": ["#a35a2a", "d"], "مکس ڈرائی فروٹ": ["#b0703a", "d"], "گری میوہ مکس": ["#c89a5a", "d"], "گری کھوپرا": ["#f3ead8", "d"], "گری برادہ": ["#f6efe0", "d"], "چار مغز": ["#d6b98a", "d"], "مضافتی کھجور": ["#3f1c14", "d"], "ایرانی کھجور": ["#5a2616", "d"], "خرمانی جیلی": ["#e98a2a", "d"], "مکس نمکو دال": ["#e0a43a", "n"], "پی نٹ سالٹ": ["#d8a86a", "n"], "چنے بھنے": ["#c88a3a", "n"], "ریوڑی": ["#f2e2c0", "n"], "پی نٹ ریوڑی": ["#d9b07a", "n"], "چکوال ریوڑی": ["#eedab0", "n"], "مصری": ["#f4f1ea", "n"], "تخم ملنگا": ["#2a2a2a", "n"], "کتیرا گوند": ["#efe7cf", "n"], "چھلکا اسپغول": ["#e6dcc6", "n"], "ساگو دانہ": ["#f5f2ea", "n"], "سبز چائے": ["#5a7a2a", "n"], "پشاوری قہوہ": ["#6a8a3a", "n"], "لیمن گراس": ["#9ab84a", "n"], "مایہ کلف": ["#f2f0ea", "n"], "کالی مرچ ثابت": ["#2e2420", "m"]};
 var S={user:null,items:[],shops:[],cart:{},pack:'',q:'',code:''};
 function $(id){return document.getElementById(id)}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
@@ -227,7 +251,7 @@ function login(code,manual){
   call('login').then(function(r){
     $('lbtn').disabled=false;$('lbtn').textContent='اندر جائیں';
     if(!r.ok){ls('bp_code',null);showLogin();showErr(r.msg);return}
-    ls('bp_code',code);S.user=r.user;S.items=r.items;S.shops=r.shops||[];
+    ls('bp_code',code);S.user=r.user;S.items=r.items;S.shops=r.shops||[];S.notices=r.notices||[];
     try{var c=JSON.parse(ls('bp_cart_'+code)||'{}');S.cart={};S.items.forEach(function(i){if(c[i.id])S.cart[i.id]=c[i.id]})}catch(e){S.cart={}}
     start();
   }).catch(function(){$('lbtn').disabled=false;$('lbtn').textContent='اندر جائیں';showLogin();showErr('انٹرنیٹ کا مسئلہ، دوبارہ کوشش کریں')});
@@ -244,7 +268,7 @@ function start(){
   var packs=[];S.items.forEach(function(i){if(packs.indexOf(i.pack)<0)packs.push(i.pack)});
   if(packs.indexOf(S.pack)<0)S.pack=packs[0]||'';
   $('packs').innerHTML=packs.map(function(p){var n=S.items.filter(function(i){return i.pack===p}).length;return '<button class="pk'+(p===S.pack?' on':'')+'" data-p="'+esc(p)+'">'+esc(p)+'<em class="lat">'+n+'</em></button>'}).join('');
-  view('shop');renderGrid();renderBar();
+  view('shop');renderGrid();renderBar();renderNotices();
 }
 $('packs').addEventListener('click',function(e){var b=e.target.closest('[data-p]');if(!b)return;S.pack=b.dataset.p;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b)});$('q').value='';S.q='';renderGrid();window.scrollTo({top:0,behavior:'smooth'})});
 $('q').addEventListener('input',function(){S.q=this.value.trim();renderGrid()});
@@ -301,7 +325,7 @@ $('send').addEventListener('click',function(){
     $('done').hidden=false;
   }).catch(function(){btn.disabled=false;btn.textContent='✅ آرڈر بھیجیں';$('cerr').textContent='انٹرنیٹ کا مسئلہ، دوبارہ بھیجیں';$('cerr').hidden=false});
 });
-function view(v){$('shopView').hidden=v!=='shop';$('ordersView').hidden=v!=='orders';renderBar();if(v==='orders')loadOrders();window.scrollTo(0,0)}
+function view(v){$('shopView').hidden=v!=='shop';$('ordersView').hidden=v!=='orders';$('nb').hidden=v!=='shop'||!(S.notices||[]).length;renderBar();if(v==='orders')loadOrders();window.scrollTo(0,0)}
 function loadOrders(){
   $('olist').innerHTML='<div class="spin"></div>';
   call('myorders').then(function(r){
@@ -314,7 +338,22 @@ function loadOrders(){
 $('ordersBtn').addEventListener('click',function(){view($('ordersView').hidden?'orders':'shop')});
 $('menuBtn').addEventListener('click',function(e){if(e.target.closest('[data-m]'))return;$('menu').hidden=!$('menu').hidden});
 $('menu').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b)return;$('menu').hidden=true;var m=b.dataset.m;
-  if(m==='out'){if(confirm('باہر نکلنا ہے؟'))logout()}else if(m==='complain'){openCp('')}else if(m==='refresh'){login(S.code)}else view(m)});
+  if(m==='out'){if(confirm('باہر نکلنا ہے؟'))logout()}else if(m==='complain'){openCp('')}else if(m==='notices'){openNotices()}else if(m==='refresh'){login(S.code)}else view(m)});
+function nk(k){k=String(k);return k.indexOf('آفر')>=0?'offer':k.indexOf('ریٹ')>=0?'rate':k.indexOf('نیا')>=0?'new':'info'}
+function nIcon(k){var m=String(k).match(/^\S+/);var c=m?m[0]:'';return /[\u0600-\u06FF]/.test(c)?'📢':c||'📢'}
+function nLabel(k){return String(k).replace(/^\S+\s*/,'')||'اطلاع'}
+function renderNotices(){
+  var L=S.notices||[];clearInterval(S._nt);$('nb').hidden=!L.length||$('shopView').hidden;if(!L.length)return;
+  var i=0;function show(){var n=L[i];$('nbBtn').className='nbb k-'+nk(n.kind);$('nbIc').textContent=nIcon(n.kind);$('nbK').textContent=nLabel(n.kind)+(L.length>1?' · '+(i+1)+'/'+L.length:'');$('nbT').textContent=n.text}
+  show();$('nbN').textContent=L.length>1?'سب دیکھیں':'کھولیں';
+  if(L.length>1)S._nt=setInterval(function(){var t=$('nbT');t.style.opacity=0;setTimeout(function(){i=(i+1)%L.length;show();t.style.opacity=1},350)},5000);
+}
+function openNotices(){
+  var L=S.notices||[];
+  $('nlist').innerHTML=L.length?L.map(function(n){return '<div class="nc k-'+nk(n.kind)+'"><span class="kd">'+esc(n.kind)+'</span><p>'+esc(n.text)+'</p>'+(n.until?'<small>آخری تاریخ: <span class="lat">'+esc(n.until)+'</span></small>':'')+'</div>'}).join(''):'<div class="empty">ابھی کوئی اعلان نہیں</div>';
+  $('nbs').hidden=false;
+}
+$('nbBtn').addEventListener('click',openNotices);
 function fillCpOrders(sel){var o=$('cpOrder');o.innerHTML='<option value="">عام شکایت (کسی آرڈر کی نہیں)</option>'+(S.orders||[]).map(function(x){return '<option value="'+esc(x.no)+'">'+esc(x.no)+' · '+esc(String(x.date).slice(0,10))+(S.user.type==='آرڈر ٹیکر'&&x.shop?' · '+esc(x.shop):'')+'</option>'}).join('');o.value=sel||''}
 function openCp(no){
   $('cpNote').value='';$('cpErr').hidden=true;[].forEach.call($('cpChips').children,function(b){b.classList.remove('on')});
