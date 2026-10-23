@@ -92,6 +92,12 @@ background:radial-gradient(ellipse 40% 66% at 50% 78%,color-mix(in srgb,var(--c)
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:25;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--cream) 30%)}
 .bar button{width:100%;max-width:732px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;background:var(--r);color:#fff;border-radius:18px;padding:12px 18px;font-weight:700;box-shadow:0 12px 26px rgba(200,16,46,.35)}
 .bar .n{background:rgba(255,255,255,.2);border-radius:999px;padding:0 10px;font-size:.85rem}
+.oc .cb{margin-top:8px;width:100%;border:1.5px solid #f3c1c1;background:#fff5f5;color:#b42318;border-radius:12px;padding:8px;font-weight:700;font-size:.85rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.chips button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-weight:600;font-size:.88rem}
+.chips button.on{border-color:#b42318;background:#fff5f5;color:#b42318}
+#cpOrder{width:100%;padding:12px;border:2px solid var(--line);border-radius:14px;font:inherit;background:#fff;margin:4px 0 10px}
+.lbl{font-weight:700;margin-top:6px;display:block}
 /* sheet */
 .ov{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:#fff;width:100%;max-width:760px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom))}
@@ -146,7 +152,7 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
     <div class="who"><b id="uname"></b><small id="utype"></small></div>
     <button class="ib" id="ordersBtn" aria-label="میرے آرڈر"><svg viewBox="0 0 24 24"><path d="M9 5h10M9 12h10M9 19h10M4 5h.01M4 12h.01M4 19h.01"/></svg></button>
     <div class="ib" id="menuBtn" role="button" tabindex="0" aria-label="مینیو"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-      <div class="menu" id="menu" hidden><button data-m="shop">🛒 نیا آرڈر</button><button data-m="orders">📋 میرے آرڈر</button><button data-m="refresh">🔄 تازہ کریں</button><button data-m="out">🚪 باہر نکلیں</button></div>
+      <div class="menu" id="menu" hidden><button data-m="shop">🛒 نیا آرڈر</button><button data-m="orders">📋 میرے آرڈر</button><button data-m="complain">⚠️ شکایت</button><button data-m="refresh">🔄 تازہ کریں</button><button data-m="out">🚪 باہر نکلیں</button></div>
     </div>
   </div></header>
 
@@ -184,6 +190,17 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
   <p style="color:var(--mut);margin:6px 0 0">بابو پلس جلد آپ سے رابطہ کرے گا۔</p>
   <button class="big wa" id="dwa">WhatsApp پر بھی اطلاع دیں</button>
   <button class="ghost" data-close>نیا آرڈر</button>
+</div></div>
+
+<div class="ov" id="cp" hidden><div class="sheet">
+  <h2>⚠️ شکایت <button class="x" data-close>✕</button></h2>
+  <label class="lbl">کون سا آرڈر؟</label>
+  <select id="cpOrder"><option value="">عام شکایت (کسی آرڈر کی نہیں)</option></select>
+  <label class="lbl">مسئلہ کیا ہے؟</label>
+  <div class="chips" id="cpChips"><button>📦 مال کم آیا</button><button>💔 پیک خراب یا پھٹا ہوا</button><button>🔄 غلط مال آ گیا</button><button>⏰ دیر سے پہنچا</button><button>💰 ریٹ یا بل میں فرق</button><button>✏️ کوئی اور بات</button></div>
+  <textarea id="cpNote" placeholder="تفصیل لکھیں… (تصویر WhatsApp پر ساتھ لگا سکتے ہیں)"></textarea>
+  <div class="err" id="cpErr" hidden></div>
+  <button class="big wa" id="cpSend">📲 WhatsApp پر شکایت بھیجیں</button>
 </div></div>
 
 <div class="toast" id="toast" hidden></div>
@@ -289,15 +306,32 @@ function loadOrders(){
   $('olist').innerHTML='<div class="spin"></div>';
   call('myorders').then(function(r){
     if(!r.ok){if(r.err){logout();showErr(r.msg)}return}
+    S.orders=r.orders;
     if(!r.orders.length){$('olist').innerHTML='<div class="empty">ابھی کوئی آرڈر نہیں</div>';return}
-    $('olist').innerHTML=r.orders.map(function(o){return '<div class="oc"><header><span class="lat">'+esc(o.no)+'</span><span class="st st-'+esc(o.status)+'">'+esc(o.status)+'</span></header><small style="color:var(--mut)">'+esc(o.date)+(S.user.type==='آرڈر ٹیکر'?' · '+esc(o.shop):'')+'</small><pre>'+esc(o.items)+'</pre><footer><span>'+esc(o.count)+' عدد</span><b class="lat">Rs '+esc(o.total)+'</b></footer></div>'}).join('');
+    $('olist').innerHTML=r.orders.map(function(o){return '<div class="oc"><header><span class="lat">'+esc(o.no)+'</span><span class="st st-'+esc(o.status)+'">'+esc(o.status)+'</span></header><small style="color:var(--mut)">'+esc(o.date)+(S.user.type==='آرڈر ٹیکر'?' · '+esc(o.shop):'')+'</small><pre>'+esc(o.items)+'</pre><footer><span>'+esc(o.count)+' عدد</span><b class="lat">Rs '+esc(o.total)+'</b></footer><button class="cb" data-cp="'+esc(o.no)+'">⚠️ اس آرڈر کی شکایت</button></div>'}).join('');
   }).catch(function(){$('olist').innerHTML='<div class="empty">انٹرنیٹ کا مسئلہ</div>'});
 }
 $('ordersBtn').addEventListener('click',function(){view($('ordersView').hidden?'orders':'shop')});
 $('menuBtn').addEventListener('click',function(e){if(e.target.closest('[data-m]'))return;$('menu').hidden=!$('menu').hidden});
 $('menu').addEventListener('click',function(e){var b=e.target.closest('[data-m]');if(!b)return;$('menu').hidden=true;var m=b.dataset.m;
-  if(m==='out'){if(confirm('باہر نکلنا ہے؟'))logout()}else if(m==='refresh'){login(S.code)}else view(m)});
-function logout(){ls('bp_code',null);S.user=null;$('code').value='';showLogin()}
+  if(m==='out'){if(confirm('باہر نکلنا ہے؟'))logout()}else if(m==='complain'){openCp('')}else if(m==='refresh'){login(S.code)}else view(m)});
+function fillCpOrders(sel){var o=$('cpOrder');o.innerHTML='<option value="">عام شکایت (کسی آرڈر کی نہیں)</option>'+(S.orders||[]).map(function(x){return '<option value="'+esc(x.no)+'">'+esc(x.no)+' · '+esc(String(x.date).slice(0,10))+(S.user.type==='آرڈر ٹیکر'&&x.shop?' · '+esc(x.shop):'')+'</option>'}).join('');o.value=sel||''}
+function openCp(no){
+  $('cpNote').value='';$('cpErr').hidden=true;[].forEach.call($('cpChips').children,function(b){b.classList.remove('on')});
+  fillCpOrders(no);$('cp').hidden=false;
+  if(!S.orders)call('myorders').then(function(r){if(r.ok){S.orders=r.orders;fillCpOrders($('cpOrder').value||no)}}).catch(function(){});
+}
+$('cpChips').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;b.classList.toggle('on')});
+$('olist').addEventListener('click',function(e){var b=e.target.closest('[data-cp]');if(b)openCp(b.dataset.cp)});
+$('cpSend').addEventListener('click',function(){
+  var issues=[].filter.call($('cpChips').children,function(b){return b.classList.contains('on')}).map(function(b){return b.textContent});
+  var note=$('cpNote').value.trim(),no=$('cpOrder').value;
+  if(!issues.length&&!note){$('cpErr').textContent='مسئلہ چنیں یا تفصیل لکھیں';$('cpErr').hidden=false;return}
+  var o=(S.orders||[]).filter(function(x){return x.no===no})[0];
+  var msg='⚠️ *شکایت — بابو پلس ایپ*\nکسٹمر: '+S.user.name+' ('+S.code+')\nقسم: '+S.user.type+(o&&o.shop&&o.shop!==S.user.name?'\nدکان: '+o.shop:'')+'\nآرڈر: '+(no||'عام شکایت')+(o?'\nتاریخ: '+o.date:'')+(issues.length?'\nمسئلہ: '+issues.join('، '):'')+(note?'\nتفصیل: '+note:'');
+  window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(msg),'_blank');$('cp').hidden=true;toast('شکایت WhatsApp پر کھل گئی، وہاں بھیج دیں');
+});
+function logout(){ls('bp_code',null);S.user=null;S.orders=null;$('code').value='';showLogin()}
 S.view=ls('bp_view')||'c';var saved=ls('bp_code');if(saved){$('code').value=saved;login(saved)}
 })();
 </script>
